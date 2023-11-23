@@ -71,7 +71,8 @@ function service_ip {
 
 	# retry for max 10s (5*2s)
 	for _ in $(seq 1 5); do
-		ip="$(docker container inspect "$cid" --format '{{ (index .NetworkSettings.Networks "docker-elk_elk").IPAddress }}')"
+		#ip="$(docker container inspect "$cid" --format '{{ (index .NetworkSettings.Networks "docker-elk_elk").IPAddress }}')"
+		ip="$(docker container inspect "$cid" --format '{{ (index .NetworkSettings.Networks "elk_db1_stack").IPAddress }}')"
 		if [ -n "$ip" ]; then
 			break
 		fi

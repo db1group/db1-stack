@@ -2,7 +2,7 @@
 #set -x
 check_existing_installation() {
     if command -v docker >/dev/null || command -v podman >/dev/null && command -v docker-compose >/dev/null; then
-        echo "Docker e Docker Compose já estão instalados no sistema."
+        echo "Docker / Podman e Docker Compose já estão instalados no sistema."
         exit 0
     fi
 }
@@ -40,7 +40,7 @@ install_docker_compose() {
     sudo usermod -aG docker $USER
     sudo systemctl start docker
     sudo systemctl enable docker
-#    sudo rm -f get-docker.sh
+    sudo rm -f get-docker.sh
     echo "Docker instalado com sucesso."
 
     echo "Instalando Docker Compose v2..."
