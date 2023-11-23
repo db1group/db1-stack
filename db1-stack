@@ -15,6 +15,12 @@ if [ "$#" -lt 1 ]; then
     echo "2. db1@stack$ ./db1-stack elk up -d"
     echo ""
     echo "1. db1@stack$ ./db1-stack mon"
+    echo ""
+    echo "1. db1@stack$ ./db1-stack node-exp"
+    echo ""
+    echo "1. db1@stack$ ./db1-stack wazuh"
+
+
 else
     if [ ! -d $COMPONENT ]; then
         echo -e "\033[0;31mComponent \"$COMPONENT\" does not exists." >&2
@@ -28,8 +34,12 @@ else
             echo "Install Sucessfully - Monitoring!"
         elif [ "$1" = "node-exp" ]; then
             docker-compose -f $COMPONENT/docker-compose.yml up -d
-            echo "Install Sucessfully - Node Exporter!"            
-
+            echo "Install Sucessfully - Node Exporter!"
+        elif [ "$1" = "wazuh" ]; then
+            docker-compose -f $COMPONENT/single-node/generate-indexer-certs.yml run --rm generator
+            sleep 5
+            docker-compose -f $COMPONENT/single-node/docker-compose.yml up -d
+            echo "Install Sucessfully - Wazuh Server!"
         fi
     fi
 fi
