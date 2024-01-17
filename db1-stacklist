@@ -13,7 +13,7 @@ check_linux_distribution() {
         if [ "$ID" = "debian" ] || [ "$ID" = "ubuntu" ]; then
             echo "Debian ou Ubuntu detectado."
             install_docker_compose
-        elif [ "$ID" = "rhel" ] || [ "$ID" = "centos" ] || [ "$ID" = "fedora" ] ; then
+        elif [ "$ID" = "rhel" ] || [ "$ID" = "fedora" ] ; then
             echo "RedHat, CentOS ou Fedora detectado."
             install_docker_compose
         elif [ "$ID" = "suse" ] || [ "$ID" = "sles" ]; then
@@ -25,6 +25,9 @@ check_linux_distribution() {
         elif [ "$ID" = "ol" ]; then
             echo "Oracle Linux detectado."
             install_docker_compose_ol
+        elif [ "$ID" = "centos" ]; then
+            echo "CentOS detectado."
+            install_docker_compose_centos
         else
             echo "Distribuição não suportada."
         fi
@@ -74,6 +77,24 @@ install_docker_compose_ol() {
     sudo chmod +x /usr/local/bin/docker-compose
     echo "Docker Compose v2 instalado com sucesso."
 }
+install_docker_compose_centos() {
+    echo "Instalando Docker..."
+    sudo yum install -y yum-utils
+    sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+    sudo yum erase podman buildah -y
+    sudo yum install docker-ce docker-ce-cli containerd.io -y
+    sudo usermod -a -G docker ${USER}
+    sudo systemctl enable docker
+    sudo systemctl start docker
+    systemctl status docker
+    echo "Docker instalado com sucesso."
+
+    echo "Instalando Docker Compose v2..."
+    sudo curl -fsSL -o /usr/local/bin/docker-compose https://github.com/docker/compose/releases/download/v2.23.0/docker-compose-linux-x86_64
+    sudo chmod +x /usr/local/bin/docker-compose
+	export PATH=$PATH:/usr/local/bin/
+    echo "Docker Compose v2 instalado com sucesso."
+}    
 
 check_existing_installation
 
