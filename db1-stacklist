@@ -25,7 +25,7 @@ check_linux_distribution() {
         elif [ "$ID" = "ol" ]; then
             echo "Oracle Linux detectado."
             install_docker_compose_ol
-        elif [ "$ID" = "centos" ] || [ "$ID" = "rhel" ]; then
+        elif [ "$ID" = "centos" ]; then
             echo "CentOS detectado."
             install_docker_compose_centos
         else
