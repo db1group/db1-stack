@@ -1,6 +1,6 @@
 🧱 Common infrastructure components in a single command.
 
-### Observability
+### Observability ##
 
 | Component | Description |
 | --- | --- |
