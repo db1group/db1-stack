@@ -1,14 +1,36 @@
 #!/bin/bash
-#set -x
+
 check_existing_installation() {
-    if command -v docker >/dev/null || command -v podman >/dev/null && command -v docker-compose >/dev/null; then
-        echo "Docker / Podman e Docker Compose já estão instalados no sistema."
-        exit 0
+    if command -v docker >/dev/null || command -v podman >/dev/null ; then
+        echo "Docker / Podman já estão instalados."
+    else 
+        check_linux_distribution
+    fi
+    
+    if command -v docker-compose >/dev/null ; then
+        version_compose=$(docker-compose version --short | head -n 1 | awk '{print $NF}')
+        if [[ "$version_compose" < "2." ]]; then
+            echo "Favor atualizar seu docker-compose para a versão 2.x"
+            exit 0
+        else
+            echo "Docker Compose versão $version_compose instalado corretamente."
+            exit 0
+        fi
+    else
+        echo "Docker Compose não está instalado."
+        check_linux_distribution
     fi
 }
 
+
+
+
 check_linux_distribution() {
-    if [ -f /etc/os-release ]; then
+    if [ -f /proc/version ] && grep -qi Microsoft /proc/version; then
+        echo "WSL2 detectado."
+        install_docker_wsl2
+        install_docker_compose_v2_wsl2
+    elif [ -f /etc/os-release ]; then
         . /etc/os-release
         if [ "$ID" = "debian" ] || [ "$ID" = "ubuntu" ]; then
             echo "Debian ou Ubuntu detectado."
@@ -36,20 +58,32 @@ check_linux_distribution() {
     fi
 }
 
-install_docker_compose() {
-    echo "Instalando Docker..."
-    curl -fsSL https://get.docker.com -o get-docker.sh
-    sudo sh get-docker.sh
+install_docker_wsl2() {
+    echo "Instalando Docker no WSL2..."
+    sudo apt update
+    sudo apt install -y docker.io
     sudo usermod -aG docker $USER
     sudo systemctl start docker
     sudo systemctl enable docker
-    sudo rm -f get-docker.sh
     echo "Docker instalado com sucesso."
+}
 
-    echo "Instalando Docker Compose v2..."
-    sudo curl -fsSL -o /usr/local/bin/docker-compose https://github.com/docker/compose/releases/download/v2.23.0/docker-compose-linux-x86_64
+install_docker_compose_v2_wsl2() {
+    echo "Instalando Docker Compose v2 no WSL2..."
+    sudo curl -L "https://github.com/docker/compose/releases/download/v2.0.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     sudo chmod +x /usr/local/bin/docker-compose
     echo "Docker Compose v2 instalado com sucesso."
+}
+
+install_docker_compose() {
+    if command -v docker-compose >/dev/null; then
+        echo "Docker Compose já está instalado."
+    else
+        echo "Instalando Docker Compose..."
+        curl -fsSL -o /usr/local/bin/docker-compose https://github.com/docker/compose/releases/download/v2.23.0/docker-compose-linux-x86_64
+        sudo chmod +x /usr/local/bin/docker-compose
+        echo "Docker Compose instalado com sucesso."
+    fi
 }
 
 install_docker_compose_amzn() {
@@ -77,6 +111,7 @@ install_docker_compose_ol() {
     sudo chmod +x /usr/local/bin/docker-compose
     echo "Docker Compose v2 instalado com sucesso."
 }
+
 install_docker_compose_centos() {
     echo "Instalando Docker..."
     sudo yum install -y yum-utils
@@ -92,9 +127,9 @@ install_docker_compose_centos() {
     echo "Instalando Docker Compose v2..."
     sudo curl -fsSL -o /usr/local/bin/docker-compose https://github.com/docker/compose/releases/download/v2.23.0/docker-compose-linux-x86_64
     sudo chmod +x /usr/local/bin/docker-compose
-	export PATH=$PATH:/usr/local/bin/
+    export PATH=$PATH:/usr/local/bin/
     echo "Docker Compose v2 instalado com sucesso."
-}    
+}
 
 check_existing_installation
 
