@@ -1,5 +1,5 @@
 #!/bin/bash
-#set -x
+set -x
 STACK_PATH=$(pwd)
 
 echo "DB1 Global Software - DB1 Stack Observability SRE/DevOps"
